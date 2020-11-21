@@ -9,7 +9,7 @@ main = tkinter.Tk()
 # Config
 main.geometry("640x820+640+320")
 main.title("Sythphonic")
-#main.iconbitmap("./images/Synthphonic.ico")
+#main.iconbitmap("././src/images/icon.png")
 main.resizable(False, False)
 main.overrideredirect(True)
 main.attributes("-alpha", 0.9)
