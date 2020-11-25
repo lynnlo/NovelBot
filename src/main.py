@@ -23,7 +23,7 @@ print("Total Unique Charaters :", chars)
 
 # Format
 
-chunklength = 75
+chunklength = 50
 step = 1
 sentences = []
 characters = []
@@ -43,14 +43,14 @@ print("Sample Character    : ", characters[0])
 # Format
 
 x = np.zeros(chunks * chunklength * chars, np.bool).reshape(chunks, chunklength, chars)
-y = np.zeros(chunks * 1 * chars, np.bool).reshape(chunks, 1, chars)
+y = np.zeros(chunks * chars, np.bool).reshape(chunks, chars)
 
 for i,v in enumerate(sentences):
 	for a,b in enumerate(v):
 		x[i][a][chardict.index(b)] = True
 
 for i,v in enumerate(characters):
-	y[i][0][chardict.index(v)] = True
+	y[i][chardict.index(v)] = True
 
 print("Total Data Values  : ", chunks * chunklength * chars)
 print("Total Label Values : ", chunks * 1 * chars)
@@ -60,10 +60,10 @@ print("Y Shape :", y.shape)
 # Model
 
 model = Sequential()
-model.add(LSTM(2 * chars, return_sequences=True, input_shape=(chunklength, chars)))
-model.add(Dense(chars))
+model.add(LSTM(chars, return_sequences=True, input_shape=(chunklength, chars)))
 model.add(Dropout(0.1))
-model.add(Reshape((1, chunklength * chars)))
+model.add(LSTM(chars))
+model.add(Dropout(0.1))
 model.add(Dense(chars))
 model.add(Activation("softmax"))
 
@@ -73,26 +73,26 @@ model.compile(optimizer="rmsprop", loss=categorical_crossentropy)
 
 # Load
 
-model = keras.models.load_model("././src/models/novelbot1")
+#model = keras.models.load_model("././src/models/novelbot1")
 
 # Train
 
-#model.fit(x=x, y=y, batch_size=chunklength, epochs=5)
+model.fit(x=x, y=y, batch_size=chunklength, epochs=5)
 
 # Save
 
-#model.save("././src/models/novelbot1")
+model.save("././src/models/novelbot2")
 
 # Prediction
 
 inputdata = x[round(len(x)/2)].reshape(1, chunklength, chars)
 
-prediction = model.predict(inputdata)[0]
+prediction = model.predict(inputdata)
 
 print("Input shape : ", inputdata.shape)
 
 # Clean
-
+exit()
 totalprediction = ""
 length = 500
 

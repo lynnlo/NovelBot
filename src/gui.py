@@ -1,5 +1,8 @@
 # Imports
 import tkinter
+import keras
+import threading
+import numpy as np
 from PIL import Image, ImageTk
 from tkinter.font import Font
 
@@ -30,39 +33,76 @@ drag = False
 
 # Functions
 def close():
-    main.destroy()
+	main.destroy()
 
 def switch_modes():
-    global borderless
-    borderless = not borderless
-    main.overrideredirect(borderless)
-    button["activebackground"] = "#303030" if borderless else "#353535"
+	global borderless
+	borderless = not borderless
+	main.overrideredirect(borderless)
+	button["activebackground"] = "#303030" if borderless else "#353535"
 
 def drag_start(e):
-    global drag
-    if borderless:
-        drag = True
-        main.x = e.x
-        main.y = e.y
-        titlelabel["background"] = "#303030"
-        iconcanvas["background"] = "#303030"
+	global drag
+	if borderless:
+		drag = True
+		main.x = e.x
+		main.y = e.y
+		titlelabel["background"] = "#303030"
+		iconcanvas["background"] = "#303030"
 
 def drag_stop(e):
-    global drag
-    if borderless:
-        drag = False
-        titlelabel["background"] = "#353535"
-        iconcanvas["background"] = "#353535"
+	global drag
+	if borderless:
+		drag = False
+		titlelabel["background"] = "#353535"
+		iconcanvas["background"] = "#353535"
 
 def drag(e):
-    if borderless:
-        dx = e.x - main.x
-        dy = e.y - main.y
-        mx = main.winfo_x() + dx
-        my = main.winfo_y() + dy
-        main.geometry("+"+str(mx)+"+"+str(my))
-    
+	if borderless:
+		dx = e.x - main.x
+		dy = e.y - main.y
+		mx = main.winfo_x() + dx
+		my = main.winfo_y() + dy
+		main.geometry("+"+str(mx)+"+"+str(my))
+	
+# AI
 
+text = open("././src/data/other.txt", "r").read()
+chardict = sorted(list(set(text)))
+chars = len(chardict)
+chunklength = 50
+model = keras.models.load_model("././src/models/novelbot1")
+totalprediction = ""
+
+def predict():
+	totalprediction = ""
+	length = int(lengthinput.get()) or 50
+	raw = textarea.get("1.0", tkinter.END)
+	raw = raw[:chunklength] if len(raw) > chunklength else raw
+	formated = np.zeros(chunklength * chars, np.bool).reshape(chunklength, chars)
+
+	for i,v in enumerate(raw):
+		formated[i][chardict.index(v)] = True
+	
+	for i in range(length):
+		prediction = model.predict(formated)
+		textprediction = []
+		arrayprediction = np.zeros(chars, np.bool).reshape(chars)
+
+		for a in prediction[0]:
+			bi, bv = 1, -1
+			for i,v in enumerate(a):
+				if v > bv:
+					bv = v
+					bi = i
+			textprediction.append(chardict[bi])
+			arrayprediction[bi] = True
+
+		formated = np.append(formated[1:], arrayprediction).reshape(chunklength, chars)
+		totalprediction += textprediction
+	
+	textarea.insert(tkinter.END, totalprediction)
+	
 # Move
 button = tkinter.Button(main, width=95, height=5, background="#353535", activebackground="#303030", borderwidth=0)
 
@@ -93,7 +133,6 @@ bannercanvas.create_image(320, 100, image=banner)
 
 bannercanvas.place(x=0, y=25)
 
-
 # Naivgation
 exitbutton = tkinter.Button(main, width=8, height=1, font=buttonfont, text="CLOSE", borderwidth=0, background="#202020", activebackground="#252525", foreground="#808080", activeforeground="#808080", command=close)
 switchbutton = tkinter.Button(main, width=8, height=1, font=buttonfont, text="SWITCH", borderwidth=0, background="#202020", activebackground="#252525", foreground="#808080", activeforeground="#808080", command=switch_modes)
@@ -103,20 +142,20 @@ switchbutton.place(x=100, y=175)
 
 # Settings
 lengthlabel = tkinter.Label(main, width=16, height=1, anchor="w", font=textfont, text="Length", background="#353535", foreground="#808080")
-lengthinput = tkinter.Entry(main, width=32, font=inputfont, borderwidth=0, background="#202020", foreground="#a0a0a0")
+lengthinput = tkinter.Entry(main, width=32, font=inputfont, text="50", borderwidth=0, background="#202020", foreground="#a0a0a0")
 
 lengthlabel.place(x=25, y=225)
 lengthinput.place(x=25, y=250)
 
 # Output
 textlabel = tkinter.Label(main, width=16, height=1, anchor="w", font=textfont, text="Output", background="#353535", foreground="#808080")
-textarea = tkinter.Text(main, width=65, height=16, font=textfont, borderwidth = 0, background="#202020")
+textarea = tkinter.Text(main, width=65, height=16, font=textfont, borderwidth = 0, background="#202020", foreground="#808080")
 
 textlabel.place(x=25, y=300)
 textarea.place(x=25, y=325)
 
 # Create
-createbutton = tkinter.Button(main, width=16, height=1, font=buttonfont, text="CREATE", borderwidth=0, background="#303030", activebackground="#353535", foreground="#b0b0b0", activeforeground="#b0b0b0",)
+createbutton = tkinter.Button(main, width=16, height=1, font=buttonfont, text="CREATE", borderwidth=0, background="#303030", activebackground="#353535", foreground="#b0b0b0", activeforeground="#b0b0b0", command=predict)
 
 createbutton.place(x=450, y=750)
 
