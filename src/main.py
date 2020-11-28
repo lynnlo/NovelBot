@@ -5,13 +5,13 @@
 
 import keras
 from keras import Sequential
-from keras.layers import LSTM, Dense, Dropout, Dropout, Activation, Reshape
+from keras.layers import LSTM, Dense, Dropout, Dropout, Activation, Flatten
 from keras.losses import categorical_crossentropy
 import numpy as np
 
 # Sort
 
-text = open("././src/data/other.txt", "r").read()
+text = open("./src/data/other.txt", "r").read()
 
 chardict = sorted(list(set(text)))
 
@@ -23,7 +23,7 @@ print("Total Unique Charaters :", chars)
 
 # Format
 
-chunklength = 50
+chunklength = 25
 step = 1
 sentences = []
 characters = []
@@ -60,10 +60,9 @@ print("Y Shape :", y.shape)
 # Model
 
 model = Sequential()
-model.add(LSTM(chars, return_sequences=True, input_shape=(chunklength, chars)))
-model.add(Dropout(0.1))
-model.add(LSTM(chars))
-model.add(Dropout(0.1))
+model.add(LSTM(chars * 4, return_sequences=True, input_shape=(chunklength, chars)))
+model.add(Dense(chars * 2))
+model.add(Flatten())
 model.add(Dense(chars))
 model.add(Activation("softmax"))
 
@@ -73,15 +72,15 @@ model.compile(optimizer="rmsprop", loss=categorical_crossentropy)
 
 # Load
 
-#model = keras.models.load_model("././src/models/novelbot1")
+model = keras.models.load_model("././src/models/novelbot2")
 
 # Train
 
-model.fit(x=x, y=y, batch_size=chunklength, epochs=5)
+model.fit(x=x, y=y, batch_size=chunklength * 5, epochs=3)
 
 # Save
 
-model.save("././src/models/novelbot2")
+model.save("./src/models/novelbot2")
 
 # Prediction
 
@@ -92,14 +91,16 @@ prediction = model.predict(inputdata)
 print("Input shape : ", inputdata.shape)
 
 # Clean
-exit()
+
 totalprediction = ""
-length = 500
+length = 50
+
+print("Predicting the next : ", length, "characters.")
 
 for i in range(length):
-
-	cleaninput = []
-	cleanprediction = []
+	prediction = model.predict(inputdata)
+	textprediction = []
+	arrayprediction = np.zeros(chars, np.bool).reshape(chars)
 
 	for a in prediction:
 		bi, bv = 1, -1
@@ -107,28 +108,10 @@ for i in range(length):
 			if v > bv:
 				bv = v
 				bi = i
-		cleanprediction.append(chardict[bi])
+		textprediction.append(chardict[bi])
+		arrayprediction[bi] = True
 
-	for a in inputdata:
-		s = []
-		for b in a:
-			for i,v in enumerate(b):
-				if v:
-					s.append(chardict[i])
-		cleaninput.append("".join(s))
-
-	# New Prediction
-
-	newinput = "".join(list(i for i in cleaninput[0])[1:]) + cleanprediction[0]
-
-	userdata = np.zeros(chunklength * chars, np.bool).reshape(1, chunklength, chars)
-
-	for i,v in enumerate(newinput):
-		userdata[0][i][chardict.index(v)] = True
-	inputdata = userdata
-
-	prediction = model.predict(inputdata)[0]
-
-	totalprediction += cleanprediction[0]
+	inputdata[0] = np.append(inputdata[0][1:], arrayprediction).reshape(chunklength, chars)
+	totalprediction += textprediction[0]
 
 print(totalprediction)

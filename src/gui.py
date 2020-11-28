@@ -11,7 +11,7 @@ main = tkinter.Tk()
 
 # Config
 main.geometry("640x820+640+320")
-main.title("Sythphonic")
+main.title("NovelBot")
 #main.iconbitmap("././src/images/icon.png")
 main.resizable(False, False)
 main.overrideredirect(True)
@@ -67,39 +67,33 @@ def drag(e):
 	
 # AI
 
-text = open("././src/data/other.txt", "r").read()
+text = open("./src/data/other.txt", "r").read()
 chardict = sorted(list(set(text)))
 chars = len(chardict)
-chunklength = 50
-model = keras.models.load_model("././src/models/novelbot1")
+chunklength = 25
+model = keras.models.load_model("./src/models/novelbot2")
 totalprediction = ""
 
 def predict():
 	totalprediction = ""
-	length = int(lengthinput.get()) or 50
+	length = int(lengthinput.get()) or 25
 	raw = textarea.get("1.0", tkinter.END)
 	raw = raw[:chunklength] if len(raw) > chunklength else raw
-	formated = np.zeros(chunklength * chars, np.bool).reshape(chunklength, chars)
+	formated = np.zeros(chunklength * chars, np.bool).reshape(1, chunklength, chars)
 
 	for i,v in enumerate(raw):
-		formated[i][chardict.index(v)] = True
+		formated[0][i][chardict.index(v)] = True
 	
 	for i in range(length):
 		prediction = model.predict(formated)
 		textprediction = []
 		arrayprediction = np.zeros(chars, np.bool).reshape(chars)
 
-		for a in prediction[0]:
-			bi, bv = 1, -1
-			for i,v in enumerate(a):
-				if v > bv:
-					bv = v
-					bi = i
-			textprediction.append(chardict[bi])
-			arrayprediction[bi] = True
+		textprediction.append(chardict[np.argmax(prediction)])
+		arrayprediction[np.argmax(prediction)] = True
 
-		formated = np.append(formated[1:], arrayprediction).reshape(chunklength, chars)
-		totalprediction += textprediction
+		formated[0] = np.append(formated[0][1:], arrayprediction).reshape(chunklength, chars)
+		totalprediction += textprediction[0]
 	
 	textarea.insert(tkinter.END, totalprediction)
 	
