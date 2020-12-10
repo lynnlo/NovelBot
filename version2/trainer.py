@@ -56,6 +56,8 @@ model.summary()
 
 model.compile(optimizer="rmsprop", loss=categorical_crossentropy)
 
+model = models.load_model("models/novelbot2-4")
+
 model.fit(x=x, y=y, batch_size=chunklength, epochs=60)
 
 userinput = "Hello there, I am"
@@ -86,6 +88,6 @@ for i in range(chunklength * 5):
 
 
 print(totalclean)
-
+print("\n\n")
 
 model.save("models/novelbot2-4")
