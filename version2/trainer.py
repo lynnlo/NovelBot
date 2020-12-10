@@ -8,7 +8,7 @@ from keras.losses import categorical_crossentropy
 from sklearn import preprocessing
 import numpy as np
 
-text = open("data\\romeoandjuliet.txt", "r").read()
+text = open("data/other.txt", "r").read()
 
 chardict = sorted(list(set(text)))
 
@@ -18,8 +18,8 @@ chars = len(chardict)
 print("Total Charaters        :", total)
 print("Total Unique Charaters :", chars)
 
-chunklength = 75
-step = 1
+chunklength = 100
+step = 5
 sentences = []
 characters = []
 
@@ -65,7 +65,7 @@ userdata = np.zeros(chunklength * chars, np.bool).reshape(1, chunklength, chars)
 for i,v in enumerate(userinput):
         userdata[0][i][chardict.index(v)] = True
 
-inputdata = x[2].reshape(1, chunklength, chars)
+inputdata = x[2000].reshape(1, chunklength, chars)
 
 print("Input shape : ", inputdata.shape)
 
@@ -88,4 +88,4 @@ for i in range(chunklength * 5):
 print(totalclean)
 
 
-model.save("models/novelbot2-3")
+model.save("models/novelbot2-4")
