@@ -1,14 +1,10 @@
-# To add a new cell, type '# %%'
-# To add a new markdown cell, type '# %% [markdown]'
-
 from keras import Sequential
 from keras import models
 from keras.layers import LSTM, Dense, Dropout, Flatten, Activation, Reshape
 from keras.losses import categorical_crossentropy
-from sklearn import preprocessing
 import numpy as np
 
-text = open("data/other.txt", "r").read()
+text = open("data/other.txt", "r", encoding="utf-8").read()
 
 chardict = sorted(list(set(text)))
 
@@ -18,8 +14,8 @@ chars = len(chardict)
 print("Total Charaters        :", total)
 print("Total Unique Charaters :", chars)
 
-chunklength = 100
-step = 5
+chunklength = 50
+step = 2
 sentences = []
 characters = []
 
@@ -45,8 +41,9 @@ print("Total Label Values : ", chunks * chars)
 print("X Shape :", x.shape)
 print("Y Shape :", y.shape)
 
+"""
 model = Sequential()
-model.add(LSTM(2 * chars, return_sequences=True, input_shape=(chunklength, chars)))
+model.add(LSTM(chars, return_sequences=True, input_shape=(chunklength, chars)))
 model.add(Dense(chars))
 model.add(Flatten())
 model.add(Dense(chars, dtype="float64"))
@@ -55,17 +52,11 @@ model.add(Activation("softmax", dtype="float64"))
 model.summary()
 
 model.compile(optimizer="rmsprop", loss=categorical_crossentropy)
+"""
 
-model = models.load_model("models/novelbot2-4")
+model = models.load_model("models/novelbot2-4b")
 
-model.fit(x=x, y=y, batch_size=chunklength, epochs=60)
-
-userinput = "Hello there, I am"
-
-userdata = np.zeros(chunklength * chars, np.bool).reshape(1, chunklength, chars)
-
-for i,v in enumerate(userinput):
-        userdata[0][i][chardict.index(v)] = True
+model.fit(x=x, y=y, batch_size=chunklength * 8, epochs=60)
 
 inputdata = x[2000].reshape(1, chunklength, chars)
 
@@ -90,4 +81,4 @@ for i in range(chunklength * 5):
 print(totalclean)
 print("\n\n")
 
-model.save("models/novelbot2-4")
+model.save("models/novelbot2-4b")
