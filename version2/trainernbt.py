@@ -53,9 +53,10 @@ model.summary()
 
 model.compile(optimizer="rmsprop", loss=categorical_crossentropy)
 """
+
 model = models.load_model("models/novelbot_nbt3")
 
-model.fit(x=x, y=y, batch_size=chunklength * 8, epochs=60)
+model.fit(x=x, y=y, batch_size=chunklength * 5, epochs=60)
 
 inputdata = x[2000].reshape(1, chunklength, chars)
 
@@ -63,7 +64,7 @@ print("Input shape : ", inputdata.shape)
 
 totalclean = ""
 
-for i in range(chunklength * 10):
+for i in range(chunklength * 20):
     prediction = model.predict(inputdata).astype("float64")
     prediction = np.random.multinomial(1, prediction[0], 1)
 
