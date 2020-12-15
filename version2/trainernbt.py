@@ -15,7 +15,7 @@ print("Total Charaters        :", total)
 print("Total Unique Charaters :", chars)
 
 chunklength = 50
-step = 10
+step = 1
 sentences = []
 characters = []
 
@@ -53,8 +53,7 @@ model.summary()
 
 model.compile(optimizer="rmsprop", loss=categorical_crossentropy)
 """
-
-model = models.load_model("models/novelbot2-4b")
+model = models.load_model("models/novelbot_nbt3")
 
 model.fit(x=x, y=y, batch_size=chunklength * 8, epochs=60)
 
@@ -77,8 +76,8 @@ for i in range(chunklength * 10):
 
     inputdata[0] = np.append(inputdata[0][1:], prediction).reshape(chunklength, chars)
 
-
+print("\n\n")
 print(totalclean)
 print("\n\n")
 
-model.save("models/novelbot2-4b")
+model.save("models/novelbot_nbt3")
