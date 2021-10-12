@@ -1,6 +1,6 @@
 # Imports
 import tkinter
-import keras
+from tensorflow import keras
 import threading
 import numpy as np
 from PIL import Image, ImageTk
@@ -11,7 +11,7 @@ main = tkinter.Tk()
 
 # Config
 main.geometry("640x820+640+320")
-main.title("Nothing But The Truth Edition")
+main.title("Novel Bot")
 main.iconbitmap("./images/icon.png")
 main.resizable(False, False)
 main.overrideredirect(True)
@@ -117,9 +117,9 @@ iconcanvas.create_image(12.5, 12.5, image=icon)
 iconcanvas.place(x=0, y=0)
 
 # Title
-titlelabel = tkinter.Label(main, width=25, font=titlefont, height=1, text="Nothing But The Truth Edition", borderwidth=0, background="#353535", foreground="#808080",)
+#titlelabel = tkinter.Label(main, width=25, font=titlefont, height=1, text="Nothing But The Truth Edition", borderwidth=0, background="#353535", foreground="#808080",)
 
-titlelabel.place(x=25, y=0)
+#titlelabel.place(x=25, y=0)
 
 # Banner
 bannerfile = Image.open("./images/banner.png").resize((640, 200))

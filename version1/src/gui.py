@@ -1,6 +1,6 @@
 # Imports
 import tkinter
-import keras
+from tensorflow import keras
 import threading
 import numpy as np
 from PIL import Image, ImageTk
